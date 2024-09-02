@@ -1,0 +1,67 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "php_cal";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$ticketDirect = $_POST['ticketDirect'];
+$ticketConnect = $_POST['ticketConnect'];
+$visaPrice = $_POST['visaPrice'];
+$otherServices = $_POST['otherServices'];
+
+// Check if there's already an entry in the table
+$sql_check = "SELECT * FROM otherthings LIMIT 1";
+$result = $conn->query($sql_check);
+
+if ($result->num_rows > 0) {
+    echo json_encode(['error' => 'Values have already been inserted.']);
+} else {
+    $sql_insert = "INSERT INTO otherthings (visa_price, directTicket_price, connectTicket_price, otherServices_price) 
+                   VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql_insert);
+    $stmt->bind_param('iiii', $visaPrice, $ticketDirect, $ticketConnect, $otherServices);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => 'Data saved successfully!']);
+    } else {
+        echo json_encode(['error' => 'Error: ' . $stmt->error]);
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "php_cal";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Check if there's already an entry in the table
+$sql_check = "SELECT COUNT(*) as count FROM otherthings LIMIT 1";
+$result = $conn->query($sql_check);
+$row = $result->fetch_assoc();
+
+if ($row['count'] > 0) {
+    echo json_encode(['exists' => true]);
+} else {
+    echo json_encode(['exists' => false]);
+}
+
+$conn->close();
+?>
+
